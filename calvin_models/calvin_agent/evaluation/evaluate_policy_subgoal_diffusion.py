@@ -1,4 +1,5 @@
 import argparse
+from absl import flags
 from collections import Counter, defaultdict
 import logging
 import os
@@ -11,6 +12,7 @@ import cv2
 from tqdm import tqdm
 import jax_diffusion_model
 import diffusion_gc_policy
+import jaxrl_m_policy
 
 # This is for using the locally installed repo clone when using slurm
 from calvin_agent.models.calvin_base_model import CalvinBaseModel
@@ -319,11 +321,17 @@ def main():
     parser.add_argument("--eval_log_dir", default=None, type=str, help="Where to log the evaluation results.")
 
     parser.add_argument("--device", default=0, type=int, help="CUDA device")
-    args = parser.parse_args()
+
+    args, unknown_flags = parser.parse_known_args()  # Let argparse parse known flags from sys.argv.
+    flags.FLAGS(sys.argv[:1] + unknown_flags)
 
     # evaluate a custom model
     if args.custom_model:
         model = CustomModel()
+        env = make_env(args.dataset_path)
+        evaluate_policy(model, env, debug=args.debug)
+    elif flags.FLAGS.jaxrl_m_config:
+        model = jaxrl_m_policy.JaxrlMinimalModel()
         env = make_env(args.dataset_path)
         evaluate_policy(model, env, debug=args.debug)
     else:
