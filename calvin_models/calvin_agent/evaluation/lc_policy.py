@@ -85,32 +85,8 @@ class LCPolicy:
         goal_input = {"language" : self.text_processor.encode(language_command)[0]}
 
         # Query model
-        action = self.agent.sample_actions(obs_input, goal_input, seed=jax.random.PRNGKey(42), temperature=0.0)
-        action = np.array(action.tolist())
-
-        # Scale action
-        #action = np.array(self.action_statistics["std"]) * action + np.array(self.action_statistics["mean"])
-        # Shift action buffer
-        if action.shape[0] > 1:
-            assert action.shape[0] == 4
-
-            self.action_buffer[1:, :, :] = self.action_buffer[:-1, :, :]
-            self.action_buffer_mask[1:, :] = self.action_buffer_mask[:-1, :]
-            self.action_buffer[:, :-1, :] = self.action_buffer[:, 1:, :]
-            self.action_buffer_mask[:, :-1] = self.action_buffer_mask[:, 1:]
-            self.action_buffer_mask = self.action_buffer_mask * np.array([[True, True, True, True],
-                                                                        [True, True, True, False],
-                                                                        [True, True, False, False],
-                                                                        [True, False, False, False]], dtype=np.bool)
-
-            # Add to action buffer
-            self.action_buffer[0] = action
-            self.action_buffer_mask[0] = np.array([True, True, True, True], dtype=np.bool)
-            # Ensemble temporally to predict action
-            action_prediction = np.sum(self.action_buffer[:, 0, :] * self.action_buffer_mask[:, 0:1], axis=0) / np.sum(self.action_buffer_mask[:, 0], axis=0)
-        else:
-            action_prediction = action[0]
-
+        action = self.agent.sample_actions(obs_input, goal_input, argmax=True, seed=jax.random.PRNGKey(42))
+        action_prediction = np.array(action.tolist()).squeeze()
         # Make gripper action either -1 or 1
         if action_prediction[-1] < 0:
             action_prediction[-1] = -1

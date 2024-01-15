@@ -1,15 +1,18 @@
 # export DIFFUSION_MODEL_CHECKPOINT=<path_to_checkpoint>
 # export JAXRL_M_POLICY_CHECKPOINT=gs://rail-tpus-mitsuhiko-central2/logs/jaxrl_m_calvin_lcbc/lcbc_ABC_D10_only_real_mixing0.9_act1_20240107_210407/checkpoint_2000000000
-export NUM_SEQUENCES=50
+export NUM_SEQUENCES=100
 export TFHUB_CACHE_DIR=~/tf_models
-export CUDA_VISIBLE_DEVICES=6
+export CUDA_VISIBLE_DEVICES=5
 export XLA_PYTHON_CLIENT_PREALLOCATE=false
 
+# name="lciql_ABC_D10_all_res18__expectile0.7_20240114_073713"
+# name="lciql_ABC_D10_forward_res18__expectile0.7_20240114_074055"
+name="lciql_ABC_D10_only_real_res18__expectile0.7_20240114_074037"
 
 python calvin_models/calvin_agent/evaluation/evaluate_policy_diffusion_lc.py --dataset_path "/home/mitsuhiko/calvin-sim/mini_dataset" --custom_model \
---checkpoint_path "gs://rail-tpus-mitsuhiko-central2/logs/jaxrl_m_calvin_lcbc/lcbc_ABC_D10_only_real_mixing0.9_act1_20240107_210407/checkpoint_200000" \
---wandb_run_name "mitsuhiko/jaxrl_m_calvin_lcbc/lcbc_ABC_D10_only_real_mixing0.9_act1_20240107_210407" \
---agent "ddpmlc"
+--checkpoint_path "gs://rail-tpus-mitsuhiko-central2/logs/CALVIN_IQL_fixed/$name/checkpoint_300000" \
+--wandb_run_name "mitsuhiko/CALVIN_IQL_fixed/$name" \
+--agent "lc"
 
 
 # --checkpoint_path "gs://rail-tpus-mitsuhiko-central2/logs/jaxrl_m_calvin_lcbc/lcbc_ABC_D10_forward_mixing0.9_act1_20240107_211457/checkpoint_200000" \

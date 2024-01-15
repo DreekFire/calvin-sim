@@ -10,6 +10,9 @@ import json
 import cv2
 from tqdm import tqdm
 import diffusion_lc_policy
+import idql_policy
+import lc_policy
+
 
 # This is for using the locally installed repo clone when using slurm
 from calvin_agent.models.calvin_base_model import CalvinBaseModel
@@ -55,9 +58,14 @@ def make_env(dataset_path):
 
 
 class CustomModel(CalvinBaseModel):
-    def __init__(self, checkpoint_path, wandb_run_name):
+    def __init__(self, checkpoint_path, wandb_run_name, agent):
         # Initialize LCBC
-        self.lc_policy = diffusion_lc_policy.LCPolicy(checkpoint_path, wandb_run_name)
+        if agent == "ddpmlc":
+            self.lc_policy = diffusion_lc_policy.LCPolicy(checkpoint_path, wandb_run_name)
+        elif agent == "idql":  
+            self.lc_policy = idql_policy.LCPolicy(checkpoint_path, wandb_run_name)
+        elif agent == "lc":
+            self.lc_policy = lc_policy.LCPolicy(checkpoint_path, wandb_run_name)
 
         # For each eval episode we need to log the following:
         #   (1) language task
@@ -284,11 +292,13 @@ def main():
 
     parser.add_argument("--checkpoint_path", default=None, type=str, help="Path to the checkpoint to load.")
     parser.add_argument("--wandb_run_name", default=None, type=str, help="Name of the wandb run.")
+    parser.add_argument("--agent", default=None, type=str, help="Name of agent, (ddpmlc, idql, etc.).", required=True)
+
     args = parser.parse_args()
 
     # evaluate a custom model
     if args.custom_model:
-        model = CustomModel(args.checkpoint_path, args.wandb_run_name)
+        model = CustomModel(args.checkpoint_path, args.wandb_run_name, args.agent)
         env = make_env(args.dataset_path)
         evaluate_policy(model, env, debug=args.debug)
     else:
