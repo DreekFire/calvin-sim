@@ -102,7 +102,7 @@ class LCPolicy:
             train=False,
             name="critic"
         )
-        print(qs)
+        # print(qs)
         # self.rng, key = jax.random.split(self.rng)
         # vs = self.agent.state.apply_fn(
         #     {"params": self.agent.state.params},

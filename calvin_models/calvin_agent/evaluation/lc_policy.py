@@ -50,16 +50,32 @@ class LCPolicy:
         # Next let's initialize the agent
         encoder_def = encoders[run.config["encoder"]](**run.config["encoder_kwargs"])
 
+        if run.config.get("critic_encoder", None):
+            critic_encoder_def = encoders[run.config["critic_encoder"]]()
+        else:
+            critic_encoder_def = None
+
         rng = jax.random.PRNGKey(42)
         rng, construct_rng = jax.random.split(rng)
-        agent = agents[run.config["agent"]].create(
-            rng=construct_rng,
-            observations=example_batch["observations"],
-            goals=example_batch["goals"],
-            actions=example_batch["actions"],
-            encoder_def=encoder_def,
-            **run.config["agent_kwargs"],
-        )
+        if critic_encoder_def is None:
+            agent = agents[run.config["agent"]].create(
+                rng=construct_rng,
+                observations=example_batch["observations"],
+                goals=example_batch["goals"],
+                actions=example_batch["actions"],
+                encoder_def=encoder_def,
+                **run.config["agent_kwargs"],
+            )
+        else:
+            agent = agents[run.config["agent"]].create(
+                rng=construct_rng,
+                observations=example_batch["observations"],
+                goals=example_batch["goals"],
+                actions=example_batch["actions"],
+                encoder_def=encoder_def,
+                critic_encoder_def=critic_encoder_def,
+                **run.config["agent_kwargs"],
+            )
 
         print("Loading checkpoint...", checkpoint_path) 
         restored = orbax.checkpoint.PyTreeCheckpointer().restore(checkpoint_path, item=agent,)
@@ -75,6 +91,7 @@ class LCPolicy:
         # Prepare action buffer for temporal ensembling
         self.action_buffer = np.zeros((4, 4, 7))
         self.action_buffer_mask = np.zeros((4, 4), dtype=np.bool)
+        self.run = run
 
     def reset(self):
         self.action_buffer = np.zeros((4, 4, 7))

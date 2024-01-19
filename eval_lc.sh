@@ -7,11 +7,17 @@ export XLA_PYTHON_CLIENT_PREALLOCATE=false
 
 # name="lciql_ABC_D10_all_res18__expectile0.7_20240114_073713"
 # name="lciql_ABC_D10_forward_res18__expectile0.7_20240114_074055"
-name="lciql_ABC_D10_only_real_res18__expectile0.7_20240114_074037"
+# name="lciql_ABC_D10_only_real_res18__expectile0.7_20240114_074037"
 
+# name="lciql_ABC_D10_forward_res18__expectile0.7_repeat1_posreward_20240115_011517"
+# name="lciql_ABC_D10_only_real_res18__expectile0.7_repeat1_posreward_20240115_011614"
+
+project="CALVIN_IQL_fixed_encoder_and_goals"
+# name="lcbc_ABCD_b256_tanhFalse_learnedstd_20240117_224749"
+name="lciql_ABCD_expectile0.7_temperature1_b256_fixed_discount0.98_tanhFalse_shared_encoder_20240118_232422"
 python calvin_models/calvin_agent/evaluation/evaluate_policy_diffusion_lc.py --dataset_path "/home/mitsuhiko/calvin-sim/mini_dataset" --custom_model \
---checkpoint_path "gs://rail-tpus-mitsuhiko-central2/logs/CALVIN_IQL_fixed/$name/checkpoint_300000" \
---wandb_run_name "mitsuhiko/CALVIN_IQL_fixed/$name" \
+--checkpoint_path "gs://rail-tpus-mitsuhiko-central2/logs/$project/$name/checkpoint_150000" \
+--wandb_run_name "mitsuhiko/$project/$name" \
 --agent "lc"
 
 
